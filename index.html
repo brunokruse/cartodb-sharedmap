@@ -48,7 +48,7 @@
     });
     map.addControl(drawControl);
 
-    cartodb.createLayer(map, 'https://brunokruse.cartodb.com/api/v2/viz/f6fea1cc-bc8f-11e4-af63-0e9d821ea90d/viz.json')
+    cartodb.createLayer(map, 'https://kgrnbrg.cartodb.com/api/v2/viz/4db6016c-3cd4-11e5-80db-0e0c41326911/viz.json')
       .addTo(map)
       .on('done', function(layer) {
         // Keep track of all draw objects
@@ -70,13 +70,13 @@
           }
 
           var line = "ST_MakeLine(Array["+sql_poly.join()+"])";
-          var username = prompt("Please enter your name");
+          var username = kgrnbrg;
 
           if (username != null) {
-            var sql = "INSERT INTO leaflet_data (username, the_geom) VALUES ('"+username+"', ST_SetSRID(ST_AsText("+line+"),4326))&api_key=YOUR_API_KEY";
+            var sql = "INSERT INTO leaflet_data (username, the_geom) VALUES ('"+username+"', ST_SetSRID(ST_AsText("+line+"),4326))&api_key=4db6016c-3cd4-11e5-80db-0e0c41326911";
 
             $.ajax({
-              url: 'https://matallo.cartodb.com/api/v2/sql?q='+sql,
+              url: 'https://kgrnbrg.cartodb.com/api/v2/sql?q='+sql,
               success: function(responseData, textStatus, jqXHR) {
                 console.log("Data saved");
               },
