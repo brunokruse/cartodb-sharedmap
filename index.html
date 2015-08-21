@@ -48,7 +48,7 @@
     });
     map.addControl(drawControl);
 
-    cartodb.createLayer(map, 'https://bk892.cartodb.com/api/v2/viz/e37f5154-47d2-11e5-9a0e-0e0c41326911/viz.json')
+    cartodb.createLayer(map, 'https://kgrnbrg.cartodb.com/api/v2/viz/4db6016c-3cd4-11e5-80db-0e0c41326911/viz.json')
       .addTo(map)
       .on('done', function(layer) {
         // Keep track of all draw objects
@@ -70,13 +70,13 @@
           }
 
           var line = "ST_MakeLine(Array["+sql_poly.join()+"])";
-          var username = "bk892";
+          var username = "kgrnbrg";
 
           if (username != null) {
-            var sql = "INSERT INTO untitled_table_1_copy (description, the_geom) VALUES ('"+username+"', ST_SetSRID(ST_AsText("+line+"),4326))&api_key=517dd456bec126e1b18298ba0f118ac41f6c8fa8";
+            var sql = "INSERT INTO mapClick (username, the_geom) VALUES ('"+username+"', ST_SetSRID(ST_AsText("+line+"),4326))&api_key=ad153a0d9413d9d5cd3346f6a06f0245f29545b0";
 
             $.ajax({
-              url: 'https://bk892.cartodb.com/api/v2/sql?q='+sql,
+              url: 'https://kgrnbrg.cartodb.com/api/v2/sql?q='+sql,
               success: function(responseData, textStatus, jqXHR) {
                 console.log("Data saved");
               },
