@@ -73,7 +73,7 @@
           var username = "kgrnbrg";
 
           if (username != null) {
-            var sql = "INSERT INTO leaflet_data (username, the_geom) VALUES ('"+username+"', ST_SetSRID(ST_AsText("+line+"),4326))&api_key=4db6016c-3cd4-11e5-80db-0e0c41326911";
+            var sql = "INSERT INTO leaflet_data (username, the_geom) VALUES ('"+username+"', ST_SetSRID(ST_AsText("+line+"),4326))&api_key=ad153a0d9413d9d5cd3346f6a06f0245f29545b0";
 
             $.ajax({
               url: 'https://kgrnbrg.cartodb.com/api/v2/sql?q='+sql,
