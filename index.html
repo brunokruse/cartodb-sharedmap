@@ -73,7 +73,7 @@
           var username = "bk892";
 
           if (username != null) {
-            var sql = "INSERT INTO untitled_table_1_copy (username, the_geom) VALUES ('"+username+"', ST_SetSRID(ST_AsText("+line+"),4326))&api_key=517dd456bec126e1b18298ba0f118ac41f6c8fa8";
+            var sql = "INSERT INTO untitled_table_1_copy (description, the_geom) VALUES ('"+username+"', ST_SetSRID(ST_AsText("+line+"),4326))&api_key=517dd456bec126e1b18298ba0f118ac41f6c8fa8";
 
             $.ajax({
               url: 'https://bk892.cartodb.com/api/v2/sql?q='+sql,
