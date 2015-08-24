@@ -28,15 +28,18 @@
 
     var map = new L.Map('map', {
       zoomControl: false,
-      center: [43, 0],
-      zoom: 3
+      center: [31.2000, 121.5000],
+      zoom: 15
     });
 
-    var layer = L.tileLayer('http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',{
+    // ATTRIBUTES LAYER
+    var layer = L.tileLayer('http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
+    {
       attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="http://cartodb.com/attributions">CartoDB</a>'
     });
     map.addLayer(layer);
 
+    // DRAW CONTROLS
     var drawControl = new L.Control.Draw({
       position: 'topright',
       draw: {
@@ -55,15 +58,53 @@
         
         // Keep track of all draw objects
         var drawnItems = new L.FeatureGroup();
+        //map.fitBounds(drawnItems.getBounds());
         map.addLayer(drawnItems);
 
+
         map.on('draw:created', function (e) {
+
+          console.log(e);
+
           var type = e.layerType,
-          draw_layer = e.layer;
+              layer = e.layer;
+
+          if (type === 'marker') {
+            // debug
+            console.log("new point at: " + layer.getLatLng());
+
+            // a popup
+            layer.bindPopup('A popup!');
+
+            // hardcoded to my account for now
+            var username = "brunokruse";
+
+            var lat = layer.getLatLng().lat;
+            var lng = layer.getLatLng().lng;
+            
+            // finally write the points back into the table
+            if (username != null) {
+              //var sql = "INSERT INTO streetfood_evening_1 (the_geom, name, notes, taste) VALUES (ST_GeomFromText('POINT(" + lat + " " + lng + ")', 4326),'test_name', 'test_notes', 'test_taste',4326))&api_key=09eab12e2da17a5a3da49fe6bbf894a395920de2";
+              //var sql = "INSERT INTO streetfood_evening_1 (the_geom, name, notes, taste) VALUES (ST_GeomFromText('POINT(" + lat + " " + lng + ")', 4326),'test_name', 'test_notes', 'test_taste')&api_key=09eab12e2da17a5a3da49fe6bbf894a395920de2";
+              var sql = "INSERT INTO street_food_evenening_1 (the_geom, name) VALUES (ST_GeomFromText('POINT(" + lng + " " + lat + ")', 4326),'some place')&api_key=09eab12e2da17a5a3da49fe6bbf894a395920de2";
+              $.ajax({
+                url: 'https://brunokruse.cartodb.com/api/v2/sql?q='+sql,
+                success: function(responseData, textStatus, jqXHR) {
+                  console.log("Data saved");
+                },
+                error: function (responseData, textStatus, errorThrown) {
+                  console.log("Problem saving the data");
+                }
+              });
+            }
+            
+          }
 
           // Show the polygon on the map
-          drawnItems.addLayer(draw_layer);
+          drawnItems.addLayer(layer);
 
+          /*
+          //SAVING DATA BACK TO CARTO
           // Get the coordinates of the polygon we just drew
           var poly = draw_layer.getLatLngs();
           var sql_poly = [];
@@ -72,24 +113,11 @@
           }
 
           var line = "ST_MakeLine(Array["+sql_poly.join()+"])";
-          var username = "brunokruse";
-
           //ST_GeomFromText(’POINT(-71.2 42.5)’, 4326)
+          */
 
-          if (username != null) {
-            var sql = "INSERT INTO streefood_evening_1 (the_geom, name, notes, taste) VALUES (ST_GeomFromText(’POINT(-71.2 42.5)’, 4326),'test_name', 'test_notes', 'test_taste',4326))&api_key=09eab12e2da17a5a3da49fe6bbf894a395920de2";
-
-            $.ajax({
-              url: 'https://brunokruse.cartodb.com/api/v2/sql?q='+sql,
-              success: function(responseData, textStatus, jqXHR) {
-                console.log("Data saved");
-              },
-              error: function (responseData, textStatus, errorThrown) {
-                console.log("Problem saving the data");
-              }
-            });
-          }
         });
+
       });
   </script>
 </body>
