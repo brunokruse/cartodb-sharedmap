@@ -20,6 +20,10 @@
         }
     </style>
 
+    <!-- JQUERY -->
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.1/jquery.min.js"></script>
+    <script src="plugins/jeditable/jquery.jeditable.js"></script>
+
     <link rel="stylesheet" href="http://libs.cartocdn.com/cartodb.js/v3/3.11/themes/css/cartodb.css" />
     <link rel="stylesheet" href="http://leaflet.github.io/Leaflet.draw/leaflet.draw.css" />
     <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.css" />
@@ -29,21 +33,54 @@
 
   <body>
     <div id="sidebar">
-        <div id="location-name"></div>
-        <div id="location-image"></div>
 
-        <p>A responsive sidebar plugin for for <a href="http://leafletjs.com/">Leaflet</a>, a JS library for interactive maps.</p>
+    	<div id="carto_id"></div>
+        <div class="edit" id="location-name"></div>
+        <div id="location-image"></div>
+        <p class="edit" id="name">our data</p>
+
+        <script>
+
+        	/*
+				approx_close (dropdown)
+				approx_open (dropdown)
+				average_price_in_rmb (money field)
+				begin (?)
+				cleanliness (stars)
+				cuisine (string)
+				cuisine_origin (string)
+				description (string)
+				fixed_moving (radio)
+				food_type (string)
+				imageurl (string)
+				location_notes (string)
+				name (string)
+				notes (string)
+				regular_hours_yn (radio)
+				taste (stars)
+				type (string)
+				vendor_origin (string)
+				visibility (radio)
+
+        	*/
+
+        </script>
+
+        <p class="edit">A responsive sidebar plugin for for <a href="http://leafletjs.com/">Leaflet</a>, a JS library for interactive maps.</p>
 
         <p><b>Click on the marker to show the sidebar again when you've closed it.</b></p>
 
-        <p>Other examples:</p>
+        <p class="edit">Other examples:</p>
 
         <ul>
             <li><a href="listing-markers.html">listing-markers example</a></li>
             <li><a href="two-sidebars.html">two-sidebars example</a></li>
         </ul>
 
-        <p class="lorem">Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.</p>
+        <p class="edit">Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.</p>
+
+        <button>delete</button>
+
     </div>
 
     <!-- MAP -->
@@ -57,6 +94,35 @@
     <script src="plugins/sidebar/L.Control.Sidebar.js"></script>
 
     <script>
+
+     var currentId = 0;
+
+	 $(document).ready(function() {
+
+		 $('.edit').editable(function(value, settings) {
+		     
+		     console.log(this.id);
+		     console.log(value);
+		     console.log(settings);
+		     
+		     updateData(this.id.toString(), value.toString(), currentId.toString());
+
+		     return(value);
+		  }, {
+		     type    : 'textarea',
+		     submit  : 'OK',
+		 });
+
+	     // $('.edit').editable('http://www.example.com/save.php', {
+	     //     type      : 'textarea',
+	     //     cancel    : 'Cancel',
+	     //     submit    : 'OK',
+	     //     indicator : '<img src="img/indicator.gif">',
+	     //     tooltip   : 'Click to edit...'
+	     // });
+
+	 });
+
       // LETS MAKE A NEW MAP
       var map = new L.Map('map', {
         zoomControl: false,
@@ -118,6 +184,35 @@
       });
       map.addControl(drawControl);
 
+      // Updating the database
+      function updateData(columnName, newData, id) {
+
+      	console.log("update:" + columnName + " with:" + newData + " dbID: " + id);
+
+      	
+      	var username = "brunokruse";
+		  // finally write the points back into the table
+	      if (username != null) {
+
+	        //var sql = "UPDATE street_food_evenening_1 SET " + columnName + " = " + newData + " WHERE cartodb_id=1&api_key=09eab12e2da17a5a3da49fe6bbf894a395920de2";
+	        
+	        console.log ("currentID: " + currentId);
+	        //var sql = "UPDATE street_food_evenening_1 SET " + columnName + "=" + newData + " WHERE cartodb_id=" +currentId+"&api_key=09eab12e2da17a5a3da49fe6bbf894a395920de2";
+			var sql = "UPDATE street_food_evenening_1 SET " + columnName + "='" + newData + "' WHERE cartodb_id=" +currentId+"&api_key=09eab12e2da17a5a3da49fe6bbf894a395920de2";
+
+	        $.ajax({
+	          url: 'https://brunokruse.cartodb.com/api/v2/sql?q='+sql,
+	          success: function(responseData, textStatus, jqXHR) {
+	            console.log("Data saved");
+	          },
+	          error: function (responseData, textStatus, errorThrown) {
+	            console.log("Problem saving the data");
+	          }
+	        });
+	      }
+
+      }
+
       // UTIL FOR GRABBING APPROPRIATE DIV
       function GetElementInsideContainer(containerID, childID) {
           var elm = {};
@@ -150,12 +245,19 @@
           subLayer.on('featureClick', function(e, latlng, pos, data) {
             sidebar.show();
 
+            console.log(data.cartodb_id);
+
+            currentId = data.cartodb_id;
+
             if ($('#location-name').length){
               var locationDiv = GetElementInsideContainer("sidebar", "location-name");
               locationDiv.innerHTML = "<h1>" + data.name + "</h1>";
               
               var imageDiv = GetElementInsideContainer("sidebar", "location-image");
               imageDiv.innerHTML = "<img src=" + data.imageurl + "\" </img>";
+
+              //var idDiv = GetElementInsideContainer("sidebar", "cartodb_id");
+              //idDiv.innerHTML = cartodb_id;
 
             }
 
@@ -173,9 +275,13 @@
               console.log("new point at: " + layer.getLatLng());
 
               layer.on('click', function () {
+                
+                // show fields with editable status
                 sidebar.show();
+
               });
 
+              // show the editable fields when dropping the pin
               sidebar.show();
 
               // hardcoded to my account for now
