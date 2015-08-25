@@ -1,124 +1,215 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Easy example | CartoDB.js</title>
+    <title>Collaborative Map</title>
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
     <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
     <link rel="shortcut icon" href="http://cartodb.com/assets/favicon.ico" />
+
+    <!-- STYLE ME YO -->
     <style>
       html, body, #map {
         height: 100%;
         padding: 0;
         margin: 0;
       }
+
+        .lorem {
+            font-style: italic;
+            color: #AAA;
+        }
     </style>
 
     <link rel="stylesheet" href="http://libs.cartocdn.com/cartodb.js/v3/3.11/themes/css/cartodb.css" />
     <link rel="stylesheet" href="http://leaflet.github.io/Leaflet.draw/leaflet.draw.css" />
+    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.css" />
+    <link rel="stylesheet" href="plugins/sidebar/L.Control.Sidebar.css" />
 
   </head>
+
   <body>
+    <div id="sidebar">
+        <div id="location-name"></div>
+        <div id="location-image"></div>
+
+        <p>A responsive sidebar plugin for for <a href="http://leafletjs.com/">Leaflet</a>, a JS library for interactive maps.</p>
+
+        <p><b>Click on the marker to show the sidebar again when you've closed it.</b></p>
+
+        <p>Other examples:</p>
+
+        <ul>
+            <li><a href="listing-markers.html">listing-markers example</a></li>
+            <li><a href="two-sidebars.html">two-sidebars example</a></li>
+        </ul>
+
+        <p class="lorem">Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.</p>
+    </div>
+
+    <!-- MAP -->
     <div id="map"></div>
 
     <!-- include cartodb.js library -->
     <script src="http://libs.cartocdn.com/cartodb.js/v3/3.11/cartodb.js"></script>
     <script src="http://leaflet.github.io/Leaflet.draw/leaflet.draw.js"></script>
 
-  <script>
+    <!--<script src="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.js"></script>-->
+    <script src="plugins/sidebar/L.Control.Sidebar.js"></script>
 
-    var map = new L.Map('map', {
-      zoomControl: false,
-      center: [31.2000, 121.5000],
-      zoom: 15
-    });
+    <script>
+      // LETS MAKE A NEW MAP
+      var map = new L.Map('map', {
+        zoomControl: false,
+        center: [31.2000, 121.5000],
+        zoom: 15
+      });
 
-    // ATTRIBUTES LAYER
-    var layer = L.tileLayer('http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
-    {
-      attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="http://cartodb.com/attributions">CartoDB</a>'
-    });
-    map.addLayer(layer);
+      // ATTRIBUTES LAYER
+      var layer = L.tileLayer('http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="http://cartodb.com/attributions">CartoDB</a>'
+      });
+      map.addLayer(layer);
+      
+      // SIDEBAR
+      var sidebar = L.control.sidebar('sidebar', {
+          closeButton: true,
+          position: 'left'
+      });
+      map.addControl(sidebar);
 
-    // DRAW CONTROLS
-    var drawControl = new L.Control.Draw({
-      position: 'topright',
-      draw: {
-        polyline: false,
-        polygon: false,
-        rectangle: false,
-        circle: false,
-        marker: true
+      setTimeout(function () {
+          sidebar.hide();
+      }, 500);
+
+      map.on('click', function () {
+          sidebar.hide();
+      })
+
+      sidebar.on('show', function () {
+          console.log('Sidebar will be visible.');
+      });
+
+      sidebar.on('shown', function () {
+          console.log('Sidebar is visible.');
+      });
+
+      sidebar.on('hide', function () {
+          console.log('Sidebar will be hidden.');
+      });
+
+      sidebar.on('hidden', function () {
+          console.log('Sidebar is hidden.');
+      });
+
+      L.DomEvent.on(sidebar.getCloseButton(), 'click', function () {
+          console.log('Close button clicked.');
+      });
+
+      // DRAW CONTROLS
+      var drawControl = new L.Control.Draw({
+        position: 'topright',
+        draw: {
+          polyline: false,
+          polygon: false,
+          rectangle: false,
+          circle: false,
+          marker: true
+        }
+      });
+      map.addControl(drawControl);
+
+      // UTIL FOR GRABBING APPROPRIATE DIV
+      function GetElementInsideContainer(containerID, childID) {
+          var elm = {};
+          var elms = document.getElementById(containerID).getElementsByTagName("*");
+          for (var i = 0; i < elms.length; i++) {
+              if (elms[i].id === childID) {
+                  elm = elms[i];
+                  break;
+              }
+          }
+          return elm;
       }
-    });
-    map.addControl(drawControl);
 
-    cartodb.createLayer(map, 'https://brunokruse.cartodb.com/api/v2/viz/a9dbaafa-4a67-11e5-895b-0e4fddd5de28/viz.json')
-      .addTo(map)
-      .on('done', function(layer) {
-        
-        // Keep track of all draw objects
-        var drawnItems = new L.FeatureGroup();
-        //map.fitBounds(drawnItems.getBounds());
-        map.addLayer(drawnItems);
+      cartodb.createLayer(map, 'https://brunokruse.cartodb.com/api/v2/viz/a9dbaafa-4a67-11e5-895b-0e4fddd5de28/viz.json')
+        .addTo(map)
+        .on('done', function(layer) {
+          
+          // Keep track of all draw objects
+          var drawnItems = new L.FeatureGroup();
 
+          // Was trying to center the map around the points
+          // doesn't seem to be working right now
+          //map.fitBounds(drawnItems.getBounds());
+          map.addLayer(drawnItems);
 
-        map.on('draw:created', function (e) {
+          var subLayer = layer.getSubLayer(0);
+          subLayer.setInteraction(true);
 
-          console.log(e);
+          // every time we click on a point do THIS
+          subLayer.on('featureClick', function(e, latlng, pos, data) {
+            sidebar.show();
+            if ($('#location-name').length){
+              var locationDiv = GetElementInsideContainer("sidebar", "location-name");
+              locationDiv.innerHTML = data.name;
+              
+              var locationDiv = GetElementInsideContainer("sidebar", "location-image");
+              locationDiv.innerHTML = "<img src=" + data.imageurl + "\" </img>";
 
-          var type = e.layerType,
-              layer = e.layer;
-
-          if (type === 'marker') {
-            // debug
-            console.log("new point at: " + layer.getLatLng());
-
-            // a popup
-            layer.bindPopup('A popup!');
-
-            // hardcoded to my account for now
-            var username = "brunokruse";
-
-            var lat = layer.getLatLng().lat;
-            var lng = layer.getLatLng().lng;
-            
-            // finally write the points back into the table
-            if (username != null) {
-              //var sql = "INSERT INTO streetfood_evening_1 (the_geom, name, notes, taste) VALUES (ST_GeomFromText('POINT(" + lat + " " + lng + ")', 4326),'test_name', 'test_notes', 'test_taste',4326))&api_key=09eab12e2da17a5a3da49fe6bbf894a395920de2";
-              //var sql = "INSERT INTO streetfood_evening_1 (the_geom, name, notes, taste) VALUES (ST_GeomFromText('POINT(" + lat + " " + lng + ")', 4326),'test_name', 'test_notes', 'test_taste')&api_key=09eab12e2da17a5a3da49fe6bbf894a395920de2";
-              var sql = "INSERT INTO street_food_evenening_1 (the_geom, name) VALUES (ST_GeomFromText('POINT(" + lng + " " + lat + ")', 4326),'some place')&api_key=09eab12e2da17a5a3da49fe6bbf894a395920de2";
-              $.ajax({
-                url: 'https://brunokruse.cartodb.com/api/v2/sql?q='+sql,
-                success: function(responseData, textStatus, jqXHR) {
-                  console.log("Data saved");
-                },
-                error: function (responseData, textStatus, errorThrown) {
-                  console.log("Problem saving the data");
-                }
-              });
             }
-            
-          }
 
-          // Show the polygon on the map
-          drawnItems.addLayer(layer);
+          });
 
-          /*
-          //SAVING DATA BACK TO CARTO
-          // Get the coordinates of the polygon we just drew
-          var poly = draw_layer.getLatLngs();
-          var sql_poly = [];
-          for (i in poly){
-            sql_poly.push("CDB_LatLng("+poly[i].lat+","+poly[i].lng+")")
-          }
+          // This happens when we create a new point
+          map.on('draw:created', function (e) {
 
-          var line = "ST_MakeLine(Array["+sql_poly.join()+"])";
-          //ST_GeomFromText(’POINT(-71.2 42.5)’, 4326)
-          */
+            var type = e.layerType,
+                layer = e.layer;
+
+            if (type === 'marker') {
+              
+              // debug
+              console.log("new point at: " + layer.getLatLng());
+
+              layer.on('click', function () {
+                sidebar.show();
+              });
+
+              sidebar.show();
+
+              // hardcoded to my account for now
+              var username = "brunokruse";
+
+              var lat = layer.getLatLng().lat;
+              var lng = layer.getLatLng().lng;
+              
+              // finally write the points back into the table
+              if (username != null) {
+                
+                //var sql = "INSERT INTO streetfood_evening_1 (the_geom, name, notes, taste) VALUES (ST_GeomFromText('POINT(" + lat + " " + lng + ")', 4326),'test_name', 'test_notes', 'test_taste',4326))&api_key=09eab12e2da17a5a3da49fe6bbf894a395920de2";
+                //var sql = "INSERT INTO streetfood_evening_1 (the_geom, name, notes, taste) VALUES (ST_GeomFromText('POINT(" + lat + " " + lng + ")', 4326),'test_name', 'test_notes', 'test_taste')&api_key=09eab12e2da17a5a3da49fe6bbf894a395920de2";
+
+                var sql = "INSERT INTO street_food_evenening_1 (the_geom, name) VALUES (ST_GeomFromText('POINT(" + lng + " " + lat + ")', 4326),'some place')&api_key=09eab12e2da17a5a3da49fe6bbf894a395920de2";
+                
+                $.ajax({
+                  url: 'https://brunokruse.cartodb.com/api/v2/sql?q='+sql,
+                  success: function(responseData, textStatus, jqXHR) {
+                    console.log("Data saved");
+                  },
+                  error: function (responseData, textStatus, errorThrown) {
+                    console.log("Problem saving the data");
+                  }
+                });
+              }
+              
+            }
+
+            // Show the polygon on the map
+            drawnItems.addLayer(layer);
+
+          });
 
         });
-
-      });
-  </script>
-</body>
+    </script>
+  </body>
 </html>
