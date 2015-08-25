@@ -149,12 +149,13 @@
           // every time we click on a point do THIS
           subLayer.on('featureClick', function(e, latlng, pos, data) {
             sidebar.show();
+
             if ($('#location-name').length){
               var locationDiv = GetElementInsideContainer("sidebar", "location-name");
-              locationDiv.innerHTML = data.name;
+              locationDiv.innerHTML = "<h1>" + data.name + "</h1>";
               
-              var locationDiv = GetElementInsideContainer("sidebar", "location-image");
-              locationDiv.innerHTML = "<img src=" + data.imageurl + "\" </img>";
+              var imageDiv = GetElementInsideContainer("sidebar", "location-image");
+              imageDiv.innerHTML = "<img src=" + data.imageurl + "\" </img>";
 
             }
 
