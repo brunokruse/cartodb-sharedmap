@@ -21,6 +21,7 @@
     </style>
 
     <!-- JQUERY -->
+
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.1/jquery.min.js"></script>
     <script src="plugins/jeditable/jquery.jeditable.js"></script>
 
@@ -32,54 +33,41 @@
   </head>
 
   <body>
+
+    <!-- SIDE BAR -->
     <div id="sidebar">
 
-    	<div id="carto_id"></div>
-        <div class="edit" id="location-name"></div>
-        <div id="location-image"></div>
-        <p class="edit" id="name">our data</p>
+        <br/>
 
-        <script>
+        <div id="carto_id"></div>
+        <div><h1 class="edit" id="location-name">Location Name</h1></div>
 
-        	/*
-				approx_close (dropdown)
-				approx_open (dropdown)
-				average_price_in_rmb (money field)
-				begin (?)
-				cleanliness (stars)
-				cuisine (string)
-				cuisine_origin (string)
-				description (string)
-				fixed_moving (radio)
-				food_type (string)
-				imageurl (string)
-				location_notes (string)
-				name (string)
-				notes (string)
-				regular_hours_yn (radio)
-				taste (stars)
-				type (string)
-				vendor_origin (string)
-				visibility (radio)
-
-        	*/
-
-        </script>
-
-        <p class="edit">A responsive sidebar plugin for for <a href="http://leafletjs.com/">Leaflet</a>, a JS library for interactive maps.</p>
-
-        <p><b>Click on the marker to show the sidebar again when you've closed it.</b></p>
-
-        <p class="edit">Other examples:</p>
-
+        <div class="edit" id="location-image">
+          <img src="http://placekitten.com.s3.amazonaws.com/homepage-samples/408/287.jpg"></img>
+        </div>
+        
         <ul>
-            <li><a href="listing-markers.html">listing-markers example</a></li>
-            <li><a href="two-sidebars.html">two-sidebars example</a></li>
+        <li><div class="edit" id="food_type">food_type</div></li>
+        <li><div class="edit" id="type">type</div></li>
+        <li><div class="edit" id="description">description</div></li>
+        <li><div class="edit" id="approx_open">Approx opening time</div></li>
+        <li><div class="edit" id="approx_close">Approx closing time</div></li>
+        <li><div class="edit" id="average_price_in_rmb">Average price in RMB</div></li>
+        <li><div class="edit" id="cleanliness">cleanliness</div></li>
+        <li><div class="edit" id="taste">taste</div></li>
+        <li><div class="edit" id="cuisine">cuisine</div></li>
+        <li><div class="edit" id="cuisine_origin">cuisine_origin</div></li>
+        <li><div class="edit" id="vendor_origin">vendor_origin</div></li>
+        <li><div class="edit" id="fixed_moving">fixed_moving</div></li>
+        <li><div class="edit" id="location_notes">location_notes</div></li>
+        <li><div class="edit" id="notes">notes</div></li>
+        <li><div class="edit" id="regular_hours_yn">regular_hours_yn</div></li>
+        <li><div class="edit" id="visibility">visibility</div></li>
         </ul>
 
-        <p class="edit">Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.</p>
+        <br />
 
-        <button>delete</button>
+        <button onclick="deletePoint()">delete</button>
 
     </div>
 
@@ -95,33 +83,22 @@
 
     <script>
 
-     var currentId = 0;
+      var currentId = 0; // ID of currently selected point to pull data from
 
-	 $(document).ready(function() {
+      // jquery.... meh
+      $(document).ready(function() {
+         $('.edit').editable(function(value, settings) {
+             
+             // update this column name to -> this value from the form
+             updateData(this.id.toString(), value.toString(), currentId.toString());
+             return(value);
 
-		 $('.edit').editable(function(value, settings) {
-		     
-		     console.log(this.id);
-		     console.log(value);
-		     console.log(settings);
-		     
-		     updateData(this.id.toString(), value.toString(), currentId.toString());
+          }, {
+             type    : 'textarea',
+             submit  : 'OK',
+         });
 
-		     return(value);
-		  }, {
-		     type    : 'textarea',
-		     submit  : 'OK',
-		 });
-
-	     // $('.edit').editable('http://www.example.com/save.php', {
-	     //     type      : 'textarea',
-	     //     cancel    : 'Cancel',
-	     //     submit    : 'OK',
-	     //     indicator : '<img src="img/indicator.gif">',
-	     //     tooltip   : 'Click to edit...'
-	     // });
-
-	 });
+       });
 
       // LETS MAKE A NEW MAP
       var map = new L.Map('map', {
@@ -151,21 +128,11 @@
           sidebar.hide();
       })
 
-      sidebar.on('show', function () {
-          console.log('Sidebar will be visible.');
-      });
-
-      sidebar.on('shown', function () {
-          console.log('Sidebar is visible.');
-      });
-
-      sidebar.on('hide', function () {
-          console.log('Sidebar will be hidden.');
-      });
-
-      sidebar.on('hidden', function () {
-          console.log('Sidebar is hidden.');
-      });
+      // SIDE BAR STUFF
+      sidebar.on('show', function () { console.log('Sidebar will be visible.'); });
+      sidebar.on('shown', function () { console.log('Sidebar is visible.'); });
+      sidebar.on('hide', function () { console.log('Sidebar will be hidden.'); });
+      sidebar.on('hidden', function () { console.log('Sidebar is hidden.'); });
 
       L.DomEvent.on(sidebar.getCloseButton(), 'click', function () {
           console.log('Close button clicked.');
@@ -184,32 +151,54 @@
       });
       map.addControl(drawControl);
 
-      // Updating the database
+      // REMOVE POINT FROM DATABASE
+      function deletePoint() {
+          
+        // hardcoded.... meh
+        var username = "brunokruse";
+        
+        sidebar.hide();
+
+        // finally write the points back into the table
+        if (username != null) {
+
+          // ASSEMBLE QUERY
+          var sql = "DELETE FROM street_food_evenening_1 WHERE cartodb_id=" +currentId+"&api_key=09eab12e2da17a5a3da49fe6bbf894a395920de2";
+
+          $.ajax({
+            url: 'https://brunokruse.cartodb.com/api/v2/sql?q='+sql,
+            success: function(responseData, textStatus, jqXHR) {
+              console.log("Data Deleted");
+            },
+            error: function (responseData, textStatus, errorThrown) {
+              console.log("Problem deleting the data");
+            }
+          });
+        }
+      }
+
+      // UTIL FOR UPDATING A COLUM IN THE DATABASE
       function updateData(columnName, newData, id) {
+        
+        // hardcoded.... meh
+        var username = "brunokruse";
+        
+        // finally write the points back into the table
+        if (username != null) {
 
-      	console.log("update:" + columnName + " with:" + newData + " dbID: " + id);
+          // ASSEMBLE QUERY
+          var sql = "UPDATE street_food_evenening_1 SET " + columnName + "='" + newData + "' WHERE cartodb_id=" +currentId+"&api_key=09eab12e2da17a5a3da49fe6bbf894a395920de2";
 
-      	
-      	var username = "brunokruse";
-		  // finally write the points back into the table
-	      if (username != null) {
-
-	        //var sql = "UPDATE street_food_evenening_1 SET " + columnName + " = " + newData + " WHERE cartodb_id=1&api_key=09eab12e2da17a5a3da49fe6bbf894a395920de2";
-	        
-	        console.log ("currentID: " + currentId);
-	        //var sql = "UPDATE street_food_evenening_1 SET " + columnName + "=" + newData + " WHERE cartodb_id=" +currentId+"&api_key=09eab12e2da17a5a3da49fe6bbf894a395920de2";
-			var sql = "UPDATE street_food_evenening_1 SET " + columnName + "='" + newData + "' WHERE cartodb_id=" +currentId+"&api_key=09eab12e2da17a5a3da49fe6bbf894a395920de2";
-
-	        $.ajax({
-	          url: 'https://brunokruse.cartodb.com/api/v2/sql?q='+sql,
-	          success: function(responseData, textStatus, jqXHR) {
-	            console.log("Data saved");
-	          },
-	          error: function (responseData, textStatus, errorThrown) {
-	            console.log("Problem saving the data");
-	          }
-	        });
-	      }
+          $.ajax({
+            url: 'https://brunokruse.cartodb.com/api/v2/sql?q='+sql,
+            success: function(responseData, textStatus, jqXHR) {
+              console.log("Data saved");
+            },
+            error: function (responseData, textStatus, errorThrown) {
+              console.log("Problem saving the data");
+            }
+          });
+        }
 
       }
 
@@ -250,15 +239,28 @@
             currentId = data.cartodb_id;
 
             if ($('#location-name').length){
-              var locationDiv = GetElementInsideContainer("sidebar", "location-name");
-              locationDiv.innerHTML = "<h1>" + data.name + "</h1>";
-              
-              var imageDiv = GetElementInsideContainer("sidebar", "location-image");
-              imageDiv.innerHTML = "<img src=" + data.imageurl + "\" </img>";
 
-              //var idDiv = GetElementInsideContainer("sidebar", "cartodb_id");
-              //idDiv.innerHTML = cartodb_id;
+              // temporary image
+              data.imageurl = "http://placekitten.com.s3.amazonaws.com/homepage-samples/408/287.jpg";
 
+              GetElementInsideContainer("sidebar", "location-name").innerHTML = data.name;
+              GetElementInsideContainer("sidebar", "location-image").innerHTML = "<img src=" + data.imageurl + "\" </img>";
+              GetElementInsideContainer("sidebar", "food_type").innerHTML = data.food_type;
+              GetElementInsideContainer("sidebar", "description").innerHTML = data.description;
+              GetElementInsideContainer("sidebar", "approx_open").innerHTML = data.approx_open;
+              GetElementInsideContainer("sidebar", "approx_close").innerHTML = data.approx_close;
+              GetElementInsideContainer("sidebar", "average_price_in_rmb").innerHTML = data.average_price_in_rmb;
+              GetElementInsideContainer("sidebar", "cleanliness").innerHTML = data.cleanliness;
+              GetElementInsideContainer("sidebar", "taste").innerHTML = data.taste;
+              GetElementInsideContainer("sidebar", "cuisine").innerHTML = data.cuisine;
+              GetElementInsideContainer("sidebar", "cuisine_origin").innerHTML = data.cuisine_origin;
+              GetElementInsideContainer("sidebar", "vendor_origin").innerHTML = data.vendor_origin;
+              GetElementInsideContainer("sidebar", "fixed_moving").innerHTML = data.fixed_moving;
+              GetElementInsideContainer("sidebar", "location_notes").innerHTML = data.location_notes;
+              GetElementInsideContainer("sidebar", "location_notes").innerHTML = data.location_notes;
+              GetElementInsideContainer("sidebar", "notes").innerHTML = data.notes;
+              GetElementInsideContainer("sidebar", "regular_hours_yn").innerHTML = data.regular_hours_yn;
+              GetElementInsideContainer("sidebar", "visibility").innerHTML = data.visibility;
             }
 
           });
