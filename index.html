@@ -65,8 +65,6 @@
         <li><div class="edit" id="visibility">visibility</div></li>
         </ul>
 
-        <br />
-
         <button onclick="deletePoint()">delete</button>
 
     </div>
@@ -175,6 +173,7 @@
             }
           });
         }
+
       }
 
       // UTIL FOR UPDATING A COLUM IN THE DATABASE
@@ -241,10 +240,11 @@
             if ($('#location-name').length){
 
               // temporary image
-              data.imageurl = "http://placekitten.com.s3.amazonaws.com/homepage-samples/408/287.jpg";
+              if (data.imageurl == "")
+                data.imageurl = "http://placekitten.com.s3.amazonaws.com/homepage-samples/408/287.jpg";
 
               GetElementInsideContainer("sidebar", "location-name").innerHTML = data.name;
-              GetElementInsideContainer("sidebar", "location-image").innerHTML = "<img src=" + data.imageurl + "\" </img>";
+              GetElementInsideContainer("sidebar", "location-image").innerHTML = "<img src=" + data.imageurl + "></img>";
               GetElementInsideContainer("sidebar", "food_type").innerHTML = data.food_type;
               GetElementInsideContainer("sidebar", "description").innerHTML = data.description;
               GetElementInsideContainer("sidebar", "approx_open").innerHTML = data.approx_open;
