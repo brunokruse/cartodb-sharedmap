@@ -140,7 +140,10 @@
       // SIDE BAR STUFF
       sidebar.on('show', function () { console.log('Sidebar will be visible.'); });
       sidebar.on('shown', function () { console.log('Sidebar is visible.'); });
-      sidebar.on('hide', function () { console.log('Sidebar will be hidden.'); });
+      sidebar.on('hide', function () { 
+        console.log('Sidebar will be hidden.'); 
+        location.reload(); // terrible hack
+      });
       sidebar.on('hidden', function () { console.log('Sidebar is hidden.'); });
 
       L.DomEvent.on(sidebar.getCloseButton(), 'click', function () {
