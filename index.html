@@ -14,10 +14,15 @@
         margin: 0;
       }
 
-        .lorem {
-            font-style: italic;
-            color: #AAA;
-        }
+      .lorem {
+        font-style: italic;
+        color: #AAA;
+      }
+
+      .deleteButton {
+
+      }
+
     </style>
 
     <!-- JQUERY -->
@@ -40,9 +45,9 @@
         <br/>
 
         <div id="carto_id"></div>
-        <div><h1 class="edit" id="location-name">Location Name</h1></div>
+        <div><h1 class="edit" id="name">Location Name</h1></div>
 
-        <div class="edit" id="location-image">
+        <div class="edit" id="image">
           <img src="http://placekitten.com.s3.amazonaws.com/homepage-samples/408/287.jpg"></img>
         </div>
         
@@ -65,7 +70,7 @@
         <li><div class="edit" id="visibility">visibility</div></li>
         </ul>
 
-        <button onclick="deletePoint()">delete</button>
+        <button class="deleteButton" onclick="deletePoint()">delete</button>
 
     </div>
 
@@ -179,6 +184,8 @@
       // UTIL FOR UPDATING A COLUM IN THE DATABASE
       function updateData(columnName, newData, id) {
         
+        console.log("column name: " + columnName + " value: " + newData + " theID: " + id)
+
         // hardcoded.... meh
         var username = "brunokruse";
         
@@ -231,20 +238,21 @@
 
           // every time we click on a point do THIS
           subLayer.on('featureClick', function(e, latlng, pos, data) {
+
             sidebar.show();
 
             console.log(data.cartodb_id);
 
             currentId = data.cartodb_id;
 
-            if ($('#location-name').length){
+            //if (GetElementInsideContainer("sidebar", "name").length){
 
               // temporary image
               if (data.imageurl == "")
                 data.imageurl = "http://placekitten.com.s3.amazonaws.com/homepage-samples/408/287.jpg";
 
-              GetElementInsideContainer("sidebar", "location-name").innerHTML = data.name;
-              GetElementInsideContainer("sidebar", "location-image").innerHTML = "<img src=" + data.imageurl + "></img>";
+              GetElementInsideContainer("sidebar", "name").innerHTML = data.name;
+              GetElementInsideContainer("sidebar", "image").innerHTML = "<img src=" + data.imageurl + "></img>";
               GetElementInsideContainer("sidebar", "food_type").innerHTML = data.food_type;
               GetElementInsideContainer("sidebar", "description").innerHTML = data.description;
               GetElementInsideContainer("sidebar", "approx_open").innerHTML = data.approx_open;
@@ -261,7 +269,8 @@
               GetElementInsideContainer("sidebar", "notes").innerHTML = data.notes;
               GetElementInsideContainer("sidebar", "regular_hours_yn").innerHTML = data.regular_hours_yn;
               GetElementInsideContainer("sidebar", "visibility").innerHTML = data.visibility;
-            }
+
+            //}
 
           });
 
@@ -273,6 +282,8 @@
 
             if (type === 'marker') {
               
+              //refreshFields();
+
               // debug
               console.log("new point at: " + layer.getLatLng());
 
