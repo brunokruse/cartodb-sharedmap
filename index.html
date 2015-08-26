@@ -1,23 +1,87 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Easy example | CartoDB.js</title>
+
+    <title>Collaborative Map</title>
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
     <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
     <link rel="shortcut icon" href="http://cartodb.com/assets/favicon.ico" />
+
+    <!-- STYLE ME YO -->
     <style>
       html, body, #map {
         height: 100%;
         padding: 0;
         margin: 0;
       }
+
+      .lorem {
+        font-style: italic;
+        color: #AAA;
+      }
+
+      .deleteButton {
+
+      }
+       .leaflet-container .leaflet-control-attribution {
+          display: none;
+        }
+        .cartodb-logo{
+          visibility: hidden; 
+       }
+
     </style>
+
+    <!-- JQUERY -->
+
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.1/jquery.min.js"></script>
+    <script src="plugins/jeditable/jquery.jeditable.js"></script>
 
     <link rel="stylesheet" href="http://libs.cartocdn.com/cartodb.js/v3/3.11/themes/css/cartodb.css" />
     <link rel="stylesheet" href="http://leaflet.github.io/Leaflet.draw/leaflet.draw.css" />
+    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.css" />
+    <link rel="stylesheet" href="plugins/sidebar/L.Control.Sidebar.css" />
 
   </head>
+
   <body>
+
+    <!-- SIDE BAR -->
+    <div id="sidebar">
+
+        <br/>
+
+        <div id="carto_id"></div>
+        <div><h1 class="edit" id="name">Location Name</h1></div>
+
+        <div class="edit" id="image">
+          <img src="http://placekitten.com.s3.amazonaws.com/homepage-samples/408/287.jpg"></img>
+        </div>
+        
+        <ul>
+        <li><div class="edit" id="food_type">food_type</div></li>
+        <li><div class="edit" id="type">type</div></li>
+        <li><div class="edit" id="description">description</div></li>
+        <li><div class="edit" id="approx_open">Approx opening time</div></li>
+        <li><div class="edit" id="approx_close">Approx closing time</div></li>
+        <li><div class="edit" id="average_price_in_rmb">Average price in RMB</div></li>
+        <li><div class="edit" id="cleanliness">cleanliness</div></li>
+        <li><div class="edit" id="taste">taste</div></li>
+        <li><div class="edit" id="cuisine">cuisine</div></li>
+        <li><div class="edit" id="cuisine_origin">cuisine_origin</div></li>
+        <li><div class="edit" id="vendor_origin">vendor_origin</div></li>
+        <li><div class="edit" id="fixed_moving">fixed_moving</div></li>
+        <li><div class="edit" id="location_notes">location_notes</div></li>
+        <li><div class="edit" id="notes">notes</div></li>
+        <li><div class="edit" id="regular_hours_yn">regular_hours_yn</div></li>
+        <li><div class="edit" id="visibility">visibility</div></li>
+        </ul>
+
+        <button class="deleteButton" onclick="deletePoint()">delete</button>
+
+    </div>
+
+    <!-- MAP -->
     <div id="map"></div>
 
     <!-- include cartodb.js library -->
@@ -88,5 +152,257 @@
         });
       });
   </script>
-</body>
+
+  </body>
+    <!--<script src="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.js"></script>-->
+    <script src="plugins/sidebar/L.Control.Sidebar.js"></script>
+
+    <script>
+
+      var currentId = 0; // ID of currently selected point to pull data from
+
+      // jquery.... meh
+      $(document).ready(function() {
+         $('.edit').editable(function(value, settings) {
+             
+             // update this column name to -> this value from the form
+             updateData(this.id.toString(), value.toString(), currentId.toString());
+             return(value);
+
+          }, {
+             type    : 'textarea',
+             submit  : 'OK',
+         });
+
+       });
+
+      // LETS MAKE A NEW MAP
+      var map = new L.Map('map', {
+        zoomControl: false,
+        center: [31.2000, 121.5000],
+        zoom: 15
+      });
+
+      // ATTRIBUTES LAYER
+      var layer = L.tileLayer('http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="http://cartodb.com/attributions">CartoDB</a>'
+      });
+      map.addLayer(layer);
+      
+      // SIDEBAR
+      var sidebar = L.control.sidebar('sidebar', {
+          closeButton: true,
+          position: 'left'
+      });
+      map.addControl(sidebar);
+
+      setTimeout(function () {
+          sidebar.hide();
+      }, 500);
+
+      map.on('click', function () {
+          sidebar.hide();
+      })
+
+      // SIDE BAR STUFF
+      sidebar.on('show', function () { console.log('Sidebar will be visible.'); });
+      sidebar.on('shown', function () { console.log('Sidebar is visible.'); });
+      sidebar.on('hide', function () { console.log('Sidebar will be hidden.'); });
+      sidebar.on('hidden', function () { console.log('Sidebar is hidden.'); });
+
+      L.DomEvent.on(sidebar.getCloseButton(), 'click', function () {
+          console.log('Close button clicked.');
+      });
+
+      // DRAW CONTROLS
+      var drawControl = new L.Control.Draw({
+        position: 'topright',
+        draw: {
+          polyline: false,
+          polygon: false,
+          rectangle: false,
+          circle: false,
+          marker: true
+        }
+      });
+      map.addControl(drawControl);
+
+      // REMOVE POINT FROM DATABASE
+      function deletePoint() {
+          
+        // hardcoded.... meh
+        var username = "brunokruse";
+        
+        sidebar.hide();
+
+        // finally write the points back into the table
+        if (username != null) {
+
+          // ASSEMBLE QUERY
+          var sql = "DELETE FROM street_food_evenening_1 WHERE cartodb_id=" +currentId+"&api_key=09eab12e2da17a5a3da49fe6bbf894a395920de2";
+
+          $.ajax({
+            url: 'https://brunokruse.cartodb.com/api/v2/sql?q='+sql,
+            success: function(responseData, textStatus, jqXHR) {
+              console.log("Data Deleted");
+            },
+            error: function (responseData, textStatus, errorThrown) {
+              console.log("Problem deleting the data");
+            }
+          });
+        }
+
+      }
+
+      // UTIL FOR UPDATING A COLUM IN THE DATABASE
+      function updateData(columnName, newData, id) {
+        
+        console.log("column name: " + columnName + " value: " + newData + " theID: " + id)
+
+        // hardcoded.... meh
+        var username = "brunokruse";
+        
+        // finally write the points back into the table
+        if (username != null) {
+
+          // ASSEMBLE QUERY
+          var sql = "UPDATE street_food_evenening_1 SET " + columnName + "='" + newData + "' WHERE cartodb_id=" +currentId+"&api_key=09eab12e2da17a5a3da49fe6bbf894a395920de2";
+
+          $.ajax({
+            url: 'https://brunokruse.cartodb.com/api/v2/sql?q='+sql,
+            success: function(responseData, textStatus, jqXHR) {
+              console.log("Data saved");
+            },
+            error: function (responseData, textStatus, errorThrown) {
+              console.log("Problem saving the data");
+            }
+          });
+        }
+
+      }
+
+      // UTIL FOR GRABBING APPROPRIATE DIV
+      function GetElementInsideContainer(containerID, childID) {
+          var elm = {};
+          var elms = document.getElementById(containerID).getElementsByTagName("*");
+          for (var i = 0; i < elms.length; i++) {
+              if (elms[i].id === childID) {
+                  elm = elms[i];
+                  break;
+              }
+          }
+          return elm;
+      }
+
+      cartodb.createLayer(map, 'https://brunokruse.cartodb.com/api/v2/viz/a9dbaafa-4a67-11e5-895b-0e4fddd5de28/viz.json')
+        .addTo(map)
+        .on('done', function(layer) {
+          
+          // Keep track of all draw objects
+          var drawnItems = new L.FeatureGroup();
+
+          // Was trying to center the map around the points
+          // doesn't seem to be working right now
+          //map.fitBounds(drawnItems.getBounds());
+          map.addLayer(drawnItems);
+
+          var subLayer = layer.getSubLayer(0);
+          subLayer.setInteraction(true);
+
+          // every time we click on a point do THIS
+          subLayer.on('featureClick', function(e, latlng, pos, data) {
+
+            sidebar.show();
+
+            console.log(data.cartodb_id);
+
+            currentId = data.cartodb_id;
+
+            //if (GetElementInsideContainer("sidebar", "name").length){
+
+              // temporary image
+              if (data.imageurl == "")
+                data.imageurl = "http://placekitten.com.s3.amazonaws.com/homepage-samples/408/287.jpg";
+
+              GetElementInsideContainer("sidebar", "name").innerHTML = data.name;
+              GetElementInsideContainer("sidebar", "image").innerHTML = "<img src=" + data.imageurl + "></img>";
+              GetElementInsideContainer("sidebar", "food_type").innerHTML = data.food_type;
+              GetElementInsideContainer("sidebar", "description").innerHTML = data.description;
+              GetElementInsideContainer("sidebar", "approx_open").innerHTML = data.approx_open;
+              GetElementInsideContainer("sidebar", "approx_close").innerHTML = data.approx_close;
+              GetElementInsideContainer("sidebar", "average_price_in_rmb").innerHTML = data.average_price_in_rmb;
+              GetElementInsideContainer("sidebar", "cleanliness").innerHTML = data.cleanliness;
+              GetElementInsideContainer("sidebar", "taste").innerHTML = data.taste;
+              GetElementInsideContainer("sidebar", "cuisine").innerHTML = data.cuisine;
+              GetElementInsideContainer("sidebar", "cuisine_origin").innerHTML = data.cuisine_origin;
+              GetElementInsideContainer("sidebar", "vendor_origin").innerHTML = data.vendor_origin;
+              GetElementInsideContainer("sidebar", "fixed_moving").innerHTML = data.fixed_moving;
+              GetElementInsideContainer("sidebar", "location_notes").innerHTML = data.location_notes;
+              GetElementInsideContainer("sidebar", "location_notes").innerHTML = data.location_notes;
+              GetElementInsideContainer("sidebar", "notes").innerHTML = data.notes;
+              GetElementInsideContainer("sidebar", "regular_hours_yn").innerHTML = data.regular_hours_yn;
+              GetElementInsideContainer("sidebar", "visibility").innerHTML = data.visibility;
+
+            //}
+
+          });
+
+          // This happens when we create a new point
+          map.on('draw:created', function (e) {
+
+            var type = e.layerType,
+                layer = e.layer;
+
+            if (type === 'marker') {
+              
+              //refreshFields();
+
+              // debug
+              console.log("new point at: " + layer.getLatLng());
+
+              layer.on('click', function () {
+                
+                // show fields with editable status
+                sidebar.show();
+
+              });
+
+              // show the editable fields when dropping the pin
+              sidebar.show();
+
+              // hardcoded to my account for now
+              var username = "brunokruse";
+
+              var lat = layer.getLatLng().lat;
+              var lng = layer.getLatLng().lng;
+              
+              // finally write the points back into the table
+              if (username != null) {
+                
+                //var sql = "INSERT INTO streetfood_evening_1 (the_geom, name, notes, taste) VALUES (ST_GeomFromText('POINT(" + lat + " " + lng + ")', 4326),'test_name', 'test_notes', 'test_taste',4326))&api_key=09eab12e2da17a5a3da49fe6bbf894a395920de2";
+                //var sql = "INSERT INTO streetfood_evening_1 (the_geom, name, notes, taste) VALUES (ST_GeomFromText('POINT(" + lat + " " + lng + ")', 4326),'test_name', 'test_notes', 'test_taste')&api_key=09eab12e2da17a5a3da49fe6bbf894a395920de2";
+
+                var sql = "INSERT INTO street_food_evenening_1 (the_geom, name) VALUES (ST_GeomFromText('POINT(" + lng + " " + lat + ")', 4326),'some place')&api_key=09eab12e2da17a5a3da49fe6bbf894a395920de2";
+                
+                $.ajax({
+                  url: 'https://brunokruse.cartodb.com/api/v2/sql?q='+sql,
+                  success: function(responseData, textStatus, jqXHR) {
+                    console.log("Data saved");
+                  },
+                  error: function (responseData, textStatus, errorThrown) {
+                    console.log("Problem saving the data");
+                  }
+                });
+              }
+              
+            }
+
+            // Show the polygon on the map
+            drawnItems.addLayer(layer);
+
+          });
+
+        });
+    </script>
+  </body>
 </html>
